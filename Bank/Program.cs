@@ -7,18 +7,91 @@ namespace Banken
         static void Main(string[] args)
         {
             Bank theBank = new Bank("$Banken$");
-            SplashScreen(theBank.BankName);
-            Console.WriteLine(theBank.CreateAcount("Alan"));
-            Console.WriteLine("Please choose an account");
-            int i = 0;
-            foreach (string str in theBank.GetAccounts())
+            while (true)
             {
-                Console.WriteLine(i+". "+str);
-                i++;
+                SplashScreen(theBank.BankName);
+                Menu();
+
+                bool menuLoop = true;
+                do
+                {
+                    switch (Console.ReadKey().Key)
+                    {
+                        case ConsoleKey.N:
+                            Console.Clear();
+                            Console.WriteLine("Input name of account: ");
+                            string accountName = Console.ReadLine();
+                            Console.WriteLine(theBank.CreateAccount(accountName));
+                            Thread.Sleep(1500);
+                            Console.Clear();
+                            Menu();
+                            break;
+
+                        case ConsoleKey.E:
+                            menuLoop = false;
+                            Console.Clear();
+
+                            Console.WriteLine("Please choose an account");
+                            int i = 0;
+                            foreach (string str in theBank.GetAccounts())
+                            {
+                                Console.WriteLine(i + ". " + str);
+                                i++;
+                            }
+                            int accountNimber = Convert.ToInt32(Console.ReadLine());
+                            Console.Clear();
+                            Account selectedAccount = theBank.Accounts[accountNimber];
+
+                            bool subMenu = true;
+                            do
+                            {
+                                Console.WriteLine("Choose an option\nD. Deposit\nW. Withdraw\nB. Balance \nBackspace. Go back");
+                                switch (Console.ReadKey().Key)
+                                {
+                                    case ConsoleKey.D:
+                                        subMenu = false;
+                                        Console.Clear();
+                                        Console.Write(theBank.Deposit(selectedAccount, GetAmount()));
+                                        break;
+                                    case ConsoleKey.W:
+                                        subMenu = false;
+                                        Console.Clear();
+                                        Console.Write(theBank.Withdraw(selectedAccount, GetAmount()));
+                                        break;
+                                    case ConsoleKey.B:
+                                        subMenu = false;
+                                        Console.Clear();
+                                        Console.WriteLine(theBank.Balance(selectedAccount));
+                                        break;
+                                    case ConsoleKey.Backspace:
+                                        subMenu = false;
+                                        Console.Clear();
+                                        Menu();
+                                        break;
+                                    default:
+                                        Console.Clear();
+                                        break;
+                                }
+                            } while (subMenu);
+                            break;
+
+                        case ConsoleKey.X:
+                            Environment.Exit(0);
+                            break;
+
+                        default:
+                            Console.Clear();
+                            break;
+                    }
+                } while (menuLoop);
+                Thread.Sleep(500);
+                Console.Clear();
             }
-            int selectedAccount = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine(theBank.Deposit(theBank.Accounts[selectedAccount], 450));
-            Console.WriteLine(theBank.Withdraw(theBank.Accounts[selectedAccount], 50));
+        }
+
+        static void Menu()
+        {
+            Console.WriteLine("************ MENU ************\nN. New Account\nE. Existing Account\nX. Exit");
         }
 
         static void SplashScreen(string bankName)
@@ -26,6 +99,27 @@ namespace Banken
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             Console.WriteLine($"Welcome to {bankName}, Enjoy your stay!");
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+        }
+
+        static int GetAmount()
+        {
+            Console.WriteLine("\nInput ammount");
+            int amount = TryParseInt();
+            return amount;
+        }
+
+        static public int TryParseInt()
+        {
+            int _value;
+            while (!int.TryParse(Console.ReadLine(), out _value))
+            {
+                Console.Clear();
+                Console.WriteLine("Not a number!");
+                Thread.Sleep(500);
+                Console.Clear();
+                Console.WriteLine("Input ammount");
+            }
+            return _value;
         }
     }
 
@@ -40,7 +134,7 @@ namespace Banken
             Accounts = new List<Account>();
         }
 
-        public string CreateAcount(string accountName)
+        public string CreateAccount(string accountName)
         {
             Account myAccount = new Account(accountName);
             Accounts.Add(myAccount);
