@@ -1,12 +1,24 @@
-﻿using System;
+﻿global using global::System;
+global using global::System.Collections.Generic;
+global using global::System.IO;
+global using global::System.Linq;
+global using global::System.Net.Http;
+global using global::System.Threading;
+global using global::System.Threading.Tasks;
+using Bank.Models;
+using Repository.Bank;
 
 namespace Banken
 {
-    internal class Program
+    public class Program
     {
+        /// <summary>
+        /// This is where the magic happens!
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Bank theBank = new Bank("$Banken$");
+            Repository.Bank.Bank theBank = new Repository.Bank.Bank("$Banken$");
             while (true)
             {
                 Menu(theBank.BankName);
@@ -36,9 +48,7 @@ namespace Banken
                             {
                                 Console.WriteLine(accNum);
                             }
-                            int accountNumber = Convert.ToInt32(Console.ReadLine());
-                            Console.Clear();
-                            Account selectedAccount = theBank.Accounts[accountNumber - 1];
+                            Account selectedAccount = theBank.Accounts[TryParseInt() - 1];
 
                             bool subMenu;
                             do
@@ -72,7 +82,6 @@ namespace Banken
                                     default:
                                         subMenu = true;
                                         Console.Clear();
-                                        Menu(theBank.BankName);
                                         break;
                                 }
                             } while (subMenu);
@@ -107,7 +116,10 @@ namespace Banken
                 Console.Clear();
             }
         }
-
+        /// <summary>
+        /// Simply prints the menu on the screen
+        /// </summary>
+        /// <param name="bankName"></param>
         static void Menu(string bankName)
         {
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
@@ -115,21 +127,28 @@ namespace Banken
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             Console.WriteLine("************ MENU ************\nN. New Account\nE. Existing Account\nB. Total bank balance \nI. Apply Interests\nX. Exit");
         }
-
-
+        /// <summary>
+        /// User inputs a number (really useless)
+        /// </summary>
+        /// <returns>Result of 'TryParseInt()'</returns>
         static int GetAmount()
         {
             Console.WriteLine("\nInput number");
             int amount = TryParseInt();
             return amount;
         }
-
+        /// <summary>
+        /// Simply Waits for a users input, then does nothing
+        /// </summary>
         static void Continue()
         {
             Console.WriteLine("\nPress any key to return to menu");
             Console.ReadKey();
         }
-
+        /// <summary>
+        /// Determines if input is an integer
+        /// </summary>
+        /// <returns>An integer</returns>
         static public int TryParseInt()
         {
             int _value;
@@ -142,173 +161,6 @@ namespace Banken
                 Console.WriteLine("Input number");
             }
             return _value;
-        }
-    }
-
-    public class Bank
-    {
-        public string BankName { get; }
-        public List<Account> Accounts { get; set; }
-        public double TotalBankBalance { get; }
-
-        public Bank(string bankName)
-        {
-            BankName = bankName;
-            Accounts = new List<Account>();
-            TotalBankBalance = GetTotalBankBalance();
-        }
-
-        public double GetTotalBankBalance()
-        {
-            return Accounts.Sum(a => a.Balance);
-        }
-
-        public string CreateAccount(string accountName)
-        {
-            string ui = "";
-            Console.WriteLine("Please choose desired account type\n1. Checking\n2. Savings\n3. Consumer\n");
-            bool accLoop = true;
-            while (accLoop)
-            {
-                switch (Console.ReadKey().Key)
-                {
-                    case ConsoleKey.D1:
-                        Account checkingAccount = new CheckingAccount(accountName, Accounts.Count + 1);
-                        Accounts.Add(checkingAccount);
-                        ui = $"A checking account with the name '{checkingAccount.AccountName}' and account number '{checkingAccount.Id}' has been created!";
-                        accLoop = false;
-                        break;
-                    case ConsoleKey.D2:
-                        Account savingsAccount = new SavingsAccount(accountName, Accounts.Count + 1);
-                        Accounts.Add(savingsAccount);
-                        ui = $"A savings account with the name '{savingsAccount.AccountName}' and account number '{savingsAccount.Id}' has been created!";
-                        accLoop = false;
-                        break;
-                    case ConsoleKey.D3:
-                        Account consumerAccount = new ConsumerAccount(accountName, Accounts.Count + 1);
-                        Accounts.Add(consumerAccount);
-                        ui = $"A consumer account with the name '{consumerAccount.AccountName}' and account number '{consumerAccount.Id}' has been created!";
-                        accLoop = false;
-                        break;
-                    default:
-                        Console.Clear();
-                        Console.WriteLine("Please choose desired account type\n1. Checking\n2. Savings\n3. Consumer\n");
-                        accLoop = true;
-                        break;
-                }
-            }
-            Console.Clear();
-            return ui;
-        }
-        public string Deposit(Account selectedAccount, int depositAmount)
-        {
-            selectedAccount.Balance += depositAmount;
-
-            string ui = $"${depositAmount} has been deposited to your account,\nyour balance is now: ${selectedAccount.Balance}";
-            return ui;
-        }
-        public string Withdraw(Account selectedAccount, int withdrawAmount)
-        {
-            selectedAccount.Balance -= withdrawAmount;
-
-            string ui = $"${withdrawAmount} has been withdrawn from your account,\nyour balance is now: ${selectedAccount.Balance}";
-            return ui;
-        }
-        public string Balance(Account selectedAccount)
-        {
-            string ui = $"Your balance is ${selectedAccount.Balance}";
-            return ui;
-        }
-
-        public List<int> GetAccounts()
-        {
-            List<int> names = new List<int>();
-            foreach (Account acc in Accounts)
-            {
-                names.Add(acc.Id);
-            }
-            return names;
-        }
-
-        public void ApplyInterests()
-        {
-            foreach (Account acc in Accounts)
-            {
-                acc.ChargeInterests();
-            }
-            Console.WriteLine("\nInterests have been applied");
-        }
-        public Account GetAccountById(int id)
-        {
-            return Accounts.First(acc => acc.Id == id);
-        }
-    }
-    public abstract class Account
-    {
-        public string AccountName { get; set; }
-        public int Id { get; init; }
-        public double Balance { get; set; }
-
-
-
-        public abstract double ChargeInterests();
-
-    }
-    public class CheckingAccount : Account
-    {
-        public CheckingAccount(string accountName, int id)
-        {
-            AccountName = accountName;
-            Id = id;
-        }
-
-        public override double ChargeInterests()
-        {
-            return Balance *= 1.005;
-        }
-    }
-    public class SavingsAccount : Account
-    {
-        public SavingsAccount(string accountName, int id)
-        {
-            AccountName = accountName;
-            Id = id;
-        }
-
-        public override double ChargeInterests()
-        {
-            if (Balance < 50000)
-            {
-                return Balance *= 1.01;
-            }
-            else if (Balance < 100000)
-            {
-                return Balance *= 1.02;
-            }
-            else
-            {
-                return Balance *= 1.03;
-            }
-        }
-    }
-    public class ConsumerAccount : Account
-    {
-        public ConsumerAccount(string accountName, int id)
-        {
-            AccountName = accountName;
-            Id = id;
-        }
-
-        public override double ChargeInterests()
-        {
-            if (Balance <= 0)
-            {
-                return Balance *= 1.001;
-            }
-            else
-            {
-                return Balance *= 0.80;
-            }
         }
     }
 }
