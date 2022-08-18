@@ -22,7 +22,7 @@ namespace Banken
                             Console.WriteLine("Input name of account: ");
                             string accountName = Console.ReadLine();
                             Console.WriteLine(theBank.CreateAccount(accountName));
-                            Thread.Sleep(1500);
+                            Continue();
                             Console.Clear();
                             Menu(theBank.BankName);
                             break;
@@ -38,7 +38,7 @@ namespace Banken
                             }
                             int accountNumber = Convert.ToInt32(Console.ReadLine());
                             Console.Clear();
-                            Account selectedAccount = theBank.Accounts[accountNumber-1];
+                            Account selectedAccount = theBank.Accounts[accountNumber - 1];
 
                             bool subMenu;
                             do
@@ -50,18 +50,19 @@ namespace Banken
                                         subMenu = false;
                                         Console.Clear();
                                         Console.Write(theBank.Deposit(selectedAccount, GetAmount()));
+                                        Continue();
                                         break;
                                     case ConsoleKey.W:
                                         subMenu = false;
                                         Console.Clear();
                                         Console.Write(theBank.Withdraw(selectedAccount, GetAmount()));
+                                        Continue();
                                         break;
                                     case ConsoleKey.B:
                                         subMenu = false;
                                         Console.Clear();
                                         Console.WriteLine(theBank.Balance(selectedAccount));
-                                        Console.WriteLine("Press any key to return to menu");
-                                        Console.ReadKey();
+                                        Continue();
                                         break;
                                     case ConsoleKey.Backspace:
                                         subMenu = false;
@@ -76,7 +77,13 @@ namespace Banken
                                 }
                             } while (subMenu);
                             break;
-
+                        case ConsoleKey.I:
+                            menuLoop = true;
+                            theBank.ApplyInterests();
+                            Continue();
+                            Console.Clear();
+                            Menu(theBank.BankName);
+                            break;
                         case ConsoleKey.X:
                             menuLoop = false;
                             Environment.Exit(0);
@@ -85,8 +92,7 @@ namespace Banken
                             menuLoop = true;
                             Console.Clear();
                             Console.WriteLine($"\nTotal balance of the bank is ${theBank.GetTotalBankBalance()}");
-                            Console.WriteLine("Press any key to return to menu");
-                            Console.ReadKey();
+                            Continue();
                             Console.Clear();
                             Menu(theBank.BankName);
                             break;
@@ -107,7 +113,7 @@ namespace Banken
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
             Console.WriteLine($"Welcome to {bankName}, Enjoy your stay!");
             Console.WriteLine("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-            Console.WriteLine("************ MENU ************\nN. New Account\nE. Existing Account\nB. Total bank balance \nX. Exit");
+            Console.WriteLine("************ MENU ************\nN. New Account\nE. Existing Account\nB. Total bank balance \nI. Apply Interests\nX. Exit");
         }
 
 
@@ -116,6 +122,12 @@ namespace Banken
             Console.WriteLine("\nInput number");
             int amount = TryParseInt();
             return amount;
+        }
+
+        static void Continue()
+        {
+            Console.WriteLine("\nPress any key to return to menu");
+            Console.ReadKey();
         }
 
         static public int TryParseInt()
@@ -137,7 +149,7 @@ namespace Banken
     {
         public string BankName { get; }
         public List<Account> Accounts { get; set; }
-        public int TotalBankBalance { get; }
+        public double TotalBankBalance { get; }
 
         public Bank(string bankName)
         {
@@ -146,17 +158,46 @@ namespace Banken
             TotalBankBalance = GetTotalBankBalance();
         }
 
-        public int GetTotalBankBalance()
+        public double GetTotalBankBalance()
         {
             return Accounts.Sum(a => a.Balance);
         }
 
         public string CreateAccount(string accountName)
         {
-
-            Account myAccount = new Account(accountName, Accounts.Count+1);
-            Accounts.Add(myAccount);
-            string ui = $"An account with the name '{myAccount.AccountName}' and the account number '{myAccount.Id}' has been created!";
+            string ui = "";
+            Console.WriteLine("Please choose desired account type\n1. Checking\n2. Savings\n3. Consumer\n");
+            bool accLoop = true;
+            while (accLoop)
+            {
+                switch (Console.ReadKey().Key)
+                {
+                    case ConsoleKey.D1:
+                        Account checkingAccount = new CheckingAccount(accountName, Accounts.Count + 1);
+                        Accounts.Add(checkingAccount);
+                        ui = $"A checking account with the name '{checkingAccount.AccountName}' and account number '{checkingAccount.Id}' has been created!";
+                        accLoop = false;
+                        break;
+                    case ConsoleKey.D2:
+                        Account savingsAccount = new SavingsAccount(accountName, Accounts.Count + 1);
+                        Accounts.Add(savingsAccount);
+                        ui = $"A savings account with the name '{savingsAccount.AccountName}' and account number '{savingsAccount.Id}' has been created!";
+                        accLoop = false;
+                        break;
+                    case ConsoleKey.D3:
+                        Account consumerAccount = new ConsumerAccount(accountName, Accounts.Count + 1);
+                        Accounts.Add(consumerAccount);
+                        ui = $"A consumer account with the name '{consumerAccount.AccountName}' and account number '{consumerAccount.Id}' has been created!";
+                        accLoop = false;
+                        break;
+                    default:
+                        Console.Clear();
+                        Console.WriteLine("Please choose desired account type\n1. Checking\n2. Savings\n3. Consumer\n");
+                        accLoop = true;
+                        break;
+                }
+            }
+            Console.Clear();
             return ui;
         }
         public string Deposit(Account selectedAccount, int depositAmount)
@@ -189,21 +230,85 @@ namespace Banken
             return names;
         }
 
+        public void ApplyInterests()
+        {
+            foreach (Account acc in Accounts)
+            {
+                acc.ChargeInterests();
+            }
+            Console.WriteLine("\nInterests have been applied");
+        }
         public Account GetAccountById(int id)
         {
             return Accounts.First(acc => acc.Id == id);
         }
     }
-    public class Account
+    public abstract class Account
     {
         public string AccountName { get; set; }
-        public int Id { get;}
-        public int Balance { get; set; }
+        public int Id { get; init; }
+        public double Balance { get; set; }
 
-        public Account(string accountName, int id)
+
+
+        public abstract double ChargeInterests();
+
+    }
+    public class CheckingAccount : Account
+    {
+        public CheckingAccount(string accountName, int id)
         {
             AccountName = accountName;
             Id = id;
+        }
+
+        public override double ChargeInterests()
+        {
+            return Balance *= 1.005;
+        }
+    }
+    public class SavingsAccount : Account
+    {
+        public SavingsAccount(string accountName, int id)
+        {
+            AccountName = accountName;
+            Id = id;
+        }
+
+        public override double ChargeInterests()
+        {
+            if (Balance < 50000)
+            {
+                return Balance *= 1.01;
+            }
+            else if (Balance < 100000)
+            {
+                return Balance *= 1.02;
+            }
+            else
+            {
+                return Balance *= 1.03;
+            }
+        }
+    }
+    public class ConsumerAccount : Account
+    {
+        public ConsumerAccount(string accountName, int id)
+        {
+            AccountName = accountName;
+            Id = id;
+        }
+
+        public override double ChargeInterests()
+        {
+            if (Balance <= 0)
+            {
+                return Balance *= 1.001;
+            }
+            else
+            {
+                return Balance *= 0.80;
+            }
         }
     }
 }
