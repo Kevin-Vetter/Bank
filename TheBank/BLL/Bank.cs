@@ -9,7 +9,7 @@ namespace Repository.Bank
         public readonly IBank _bank;
         public Bank(IBank bank)
         {
-            BankName = "EUC Bank";
+            BankName = "$Banken$";
             _bank = bank;
         }
     }

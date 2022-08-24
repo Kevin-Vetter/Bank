@@ -9,9 +9,9 @@
             AccountType = "Lønkonto";
         }
 
-        public override decimal ChargeInterest()
+        public override double ChargeInterest()
         {
-            return Balance *= 1.005m;
+            return Balance *= 1.005;
         }
 
     }

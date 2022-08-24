@@ -8,15 +8,15 @@
             AccountNumber = accountNumber;
             AccountType = "MasterCard konto";
         }
-        public override decimal ChargeInterest()
+        public override double ChargeInterest()
         {
             if (Balance > 0)
             {
-                Balance *= 1.01m;
+                Balance *= 1.01;
             }
             else
             {
-                Balance *= 1.2m;
+                Balance *= 1.2;
             }
             return Balance;
         }

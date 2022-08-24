@@ -8,10 +8,10 @@ namespace TheBankTest
     public class UnitTest1
     {
         [Theory]
-        [InlineData("a", ConsoleKey.D1)]
-        [InlineData("a", ConsoleKey.D2)]
-        [InlineData("a", ConsoleKey.D3)]
-        public void Check_if_account_created(string name, ConsoleKey key)
+        [InlineData("Kevin", ConsoleKey.D1)]
+        [InlineData("Kevin", ConsoleKey.D2)]
+        [InlineData("Kevin", ConsoleKey.D3)]
+        public void Test_if_account_created(string name, ConsoleKey key)
         {
             //Arrange
             BankRepo bankRepo = new();
@@ -24,37 +24,37 @@ namespace TheBankTest
         }
 
         [Fact]
-        public void Check_for_deposit_from_account()
+        public void Test_for_deposit_from_account()
         {
             // Arrange
             BankRepo bankRepo = new();
 
             // Act
-            bankRepo.CreateAccount("a", ConsoleKey.D1);
+            bankRepo.CreateAccount("Kevin", ConsoleKey.D1);
             
             // Assert
             Assert.Equal(100, bankRepo.Deposit(0, 100));
         }
 
         [Fact]
-        public void Check_for_withdraw_from_account()
+        public void Test_for_withdraw_from_account()
         {
             // Arrange
             BankRepo bankRepo = new();
 
             // Act
-            bankRepo.CreateAccount("a", ConsoleKey.D1);
+            bankRepo.CreateAccount("Kevin", ConsoleKey.D1);
 
             // Assert
             Assert.Equal(-100, bankRepo.Withdraw(0, 100));
         }
 
         [Fact]
-        public void Check_account_balance()
+        public void Test_account_balance()
         {
             //Arrange
             BankRepo bankRepo = new();
-            bankRepo.CreateAccount("a", ConsoleKey.D1);
+            bankRepo.CreateAccount("Kevin", ConsoleKey.D1);
             
             // Act
             bankRepo.Deposit(0, 100);
@@ -64,12 +64,12 @@ namespace TheBankTest
         }
 
         [Fact]
-        public void Check_bank_balance()
+        public void Test_bank_balance()
         {
             // Arrange
             BankRepo bankRepo = new();
-            bankRepo.CreateAccount("a", ConsoleKey.D1);
-            bankRepo.CreateAccount("a", ConsoleKey.D1);
+            bankRepo.CreateAccount("Kevin", ConsoleKey.D1);
+            bankRepo.CreateAccount("Kevin", ConsoleKey.D1);
             
             // Act
             bankRepo.Deposit(0, 100);
@@ -80,12 +80,12 @@ namespace TheBankTest
         }
 
         [Theory]
-        [InlineData("a", ConsoleKey.D1, 100)]
-        [InlineData("a", ConsoleKey.D2, 100)]
-        [InlineData("a", ConsoleKey.D3, 100)]
-        [InlineData("a", ConsoleKey.D3, 51000)]
-        [InlineData("a", ConsoleKey.D3, 110000)]
-        public void Check_balance_after_charging_interest(string name, ConsoleKey key, int amount)
+        [InlineData("Kevin", ConsoleKey.D1, 100)]
+        [InlineData("Kevin", ConsoleKey.D2, 100)]
+        [InlineData("Kevin", ConsoleKey.D3, 100)]
+        [InlineData("Kevin", ConsoleKey.D3, 51000)]
+        [InlineData("Kevin", ConsoleKey.D3, 110000)]
+        public void Test_balance_after_charging_interest(string name, ConsoleKey key, int amount)
         {
             // Arrange
             BankRepo bankRepo = new();
@@ -100,7 +100,7 @@ namespace TheBankTest
         }
 
         [Fact]
-        public void Check_if_same_account()
+        public void Test_if_same_account()
         {
             // Arrange
             BankRepo bankRepo = new();

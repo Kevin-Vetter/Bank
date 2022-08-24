@@ -11,28 +11,23 @@ Menu(serviceProvider);
 
 static void Menu(ServiceProvider sp)
 {
-    if (sp == null)
-    {
-        Environment.Exit(0);
-    }
     Bank bank = new(sp.GetService<IBank>());
 
     do
     {
         Console.Clear();
         Console.WriteLine($"Velkommen til {bank.BankName}");
-        Console.CursorVisible = false;
         MenuList();
-        switch (Console.ReadKey(true).Key)
+        switch (Console.ReadKey().Key)
         {
-            #region Create account
-            case ConsoleKey.D1 or ConsoleKey.NumPad1:
+            #region Code for creating account
+            case ConsoleKey.O:
                 Console.CursorVisible = false;
                 SubMenuList();
-                ConsoleKey type = Console.ReadKey(true).Key;
+                ConsoleKey type = Console.ReadKey().Key;
                 Console.Clear();
                 Console.CursorVisible = true;
-                Console.WriteLine("Name: ");
+                Console.WriteLine("Navn: ");
                 string name = Console.ReadLine();
                 while (string.IsNullOrWhiteSpace(name))
                 {
@@ -45,108 +40,106 @@ static void Menu(ServiceProvider sp)
                 Console.Clear();
                 Console.CursorVisible = false;
                 Console.WriteLine(account != null ? $"{account.AccountType} oprettet med navn {account.Name} og nummer {account.AccountNumber}" : "fejl");
-                Console.ReadKey(true);
+                Continue();
                 break;
             #endregion
 
-            #region Deposit
-            case ConsoleKey.D2 or ConsoleKey.NumPad2:
+            #region Code for depositing
+            case ConsoleKey.U:
                 Console.CursorVisible = true;
                 Console.Clear();
                 Console.WriteLine("Indtast kontonummer");
                 int number = ValidateInt();
                 Console.Clear();
                 Console.WriteLine("Indtast beløb: ");
-                decimal amount = ValidateDecimal();
+                double amount = ValidateDouble();
                 Console.CursorVisible = false;
                 bool checkNull = bank._bank.Deposit(number, amount).HasValue;
                 Console.WriteLine(checkNull ? $"Saldo efter indsæt: {bank._bank.Balance(number):c}" : "Konto findes ikke");
-                Console.ReadKey(true);
+                Continue();
                 break;
             #endregion
 
-            #region Withdraw
-            case ConsoleKey.D3 or ConsoleKey.NumPad3:
+            #region Code for withdrawl
+            case ConsoleKey.I:
                 try
                 {
-
                     Console.CursorVisible = true;
                     Console.Clear();
                     Console.WriteLine("Indtast kontonummer");
                     number = ValidateInt();
                     Console.Clear();
                     Console.WriteLine("Indtast beløb: ");
-                    amount = ValidateDecimal();
+                    amount = ValidateDouble();
                     Console.CursorVisible = false;
                     checkNull = bank._bank.Withdraw(number, amount) != null;
                     Console.WriteLine(checkNull ? $"Saldo efter hæv: {bank._bank.Balance(number):c}" : "Konto findes ikke");
-                    Console.ReadKey(true);
+                    Continue();
                 }
                 catch (OverdraftException exception)
                 {
                     Console.WriteLine(exception.Message);
-                    Console.ReadKey(true);
+                    Continue();
                 }
-                catch (Exception) { }
                 break;
             #endregion
 
-            #region Balance
-            case ConsoleKey.D4 or ConsoleKey.NumPad4:
+            #region Code for showing balance
+            case ConsoleKey.S:
                 Console.Clear();
                 Console.WriteLine("Indtast kontonummer:");
                 number = ValidateInt();
                 checkNull = bank._bank.Balance(number).HasValue;
                 Console.WriteLine(checkNull ? $"Saldo er: {bank._bank.Balance(number):c}" : "Konto findes ikke");
-                Console.ReadKey(true);
+                Continue();
                 break;
             #endregion
 
-            #region Bank Name
-            case ConsoleKey.D5 or ConsoleKey.NumPad5:
+            #region Code for showing everything
+            case ConsoleKey.B:
                 Console.Clear();
                 Console.WriteLine($"Bank: {bank.BankName}");
                 Console.WriteLine($"Bank saldo: {bank._bank.BankBalance():c}");
-                Console.ReadKey(true);
+                Continue();
                 break;
             #endregion
 
-            #region Charge interest
-            case ConsoleKey.D6 or ConsoleKey.NumPad6:
+            #region Code for charging interests
+            case ConsoleKey.R:
                 bank._bank.ChargeInterest();
                 break;
             #endregion
 
-            #region Show all accounts
-            case ConsoleKey.D7:
+            #region Code for account list
+            case ConsoleKey.K:
                 Console.Clear();
                 foreach (AccountListItem accItem in bank._bank.GetAccountList())
                 {
                     Console.WriteLine($"{accItem.Account.Name}\t{accItem.Account.AccountType}\t{accItem.Account.Balance}");
                 }
-                Console.ReadKey(true);
+                Continue();
                 break;
             #endregion
 
-            #region Exit
+            #region Code for exiting
             case ConsoleKey.Escape:
                 Environment.Exit(0);
                 break;
             #endregion
 
-            #region Default
+            #region Code for default
             default:
                 Console.Clear();
                 break;
-                #endregion
+            #endregion
         }
     } while (true);
 }
 
-static decimal ValidateDecimal()
+static double ValidateDouble()
 {
-    decimal amount;
-    while (!decimal.TryParse(Console.ReadLine(), out amount))
+    double amount;
+    while (!double.TryParse(Console.ReadLine(), out amount))
     {
         Console.Clear();
         Console.WriteLine("Ugyldigt input!");
@@ -162,8 +155,8 @@ static int ValidateInt()
     while (!int.TryParse(Console.ReadLine(), out amount))
     {
         Console.Clear();
-        Console.WriteLine("Ugyldigt input!");
-        Console.WriteLine("Indtast beløb: ");
+        Console.WriteLine("Ugyldigt indtasting!");
+        Console.WriteLine("Indtast tal: ");
     }
     Console.Clear();
     return amount;
@@ -171,35 +164,28 @@ static int ValidateInt()
 
 static void MenuList()
 {
-    List<string> menu = new()
-    {
-        "1. Create Account",
-        "2. Deposit",
-        "3. Withdraw",
-        "4. Show balance",
-        "5. Show bank",
-        "6. Get interests",
-        "7. Show all accounts"
-    };
-
-    foreach (string item in menu)
-    {
-        Console.WriteLine(item);
-    }
+    Console.WriteLine(
+    "O. Opret konto\n" +
+    "U. Udbetaling\n" +
+    "I. Indbetaling\n" +
+    "S. Vis Saldo\n" +
+    "B. Vis Bank\n" +
+    "R. Applicer rente\n" +
+    "K. Vis alle konti\n" +
+    "ESC. Afslut");
 }
 
 static void SubMenuList()
 {
     Console.Clear();
-    List<string> subMenu = new()
-    {
-        "1. Checking account",
-        "2. Savings account",
-        "3. Master Card account"
-    };
+    Console.WriteLine(
+    "1. Check konto\n" +
+    "2. Opsparings konto\n" +
+    "3. Mastercard konto");
+}
 
-    foreach (string item in subMenu)
-    {
-        Console.WriteLine(item);
-    }
+static void Continue()
+{
+    Console.WriteLine("\nTryk på en tast for at forsætte");
+    Console.ReadKey();
 }

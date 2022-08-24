@@ -44,7 +44,7 @@ namespace TheBank.Repository
         /// </summary>
         /// <param name="amount"></param>
         /// <returns>Balance after deposit</returns>
-        public decimal? Deposit(int accountNumber, decimal amount)
+        public double? Deposit(int accountNumber, double amount)
         {
             Account? _account = accounts.Find(x => x.AccountNumber == accountNumber);
             return _account != null ? _account.Balance += amount : null;
@@ -55,7 +55,7 @@ namespace TheBank.Repository
         /// </summary>
         /// <param name="amount"></param>
         /// <returns>balance after withdrawal</returns>
-        public decimal? Withdraw(int accountNumber, decimal amount)
+        public double? Withdraw(int accountNumber, double amount)
         {
             Account? _account = accounts.Find(x => x.AccountNumber == accountNumber);
             if ((_account?.Balance - amount) < 0 && _account?.AccountType == "MasterCard konto")
@@ -74,7 +74,7 @@ namespace TheBank.Repository
         /// </summary>
         /// <param name="accountNumber"></param>
         /// <returns></returns>
-        public decimal? Balance(int accountNumber)
+        public double? Balance(int accountNumber)
         {
             Account? _account = accounts.Find(x => x.AccountNumber == accountNumber);
             return _account?.Balance;
@@ -84,7 +84,7 @@ namespace TheBank.Repository
         /// Gets all balances
         /// </summary>
         /// <returns>sum of all</returns>
-        public decimal BankBalance()
+        public double BankBalance()
         {
             return accounts.Sum(x => x.Balance);
         }
